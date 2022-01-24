@@ -42,6 +42,17 @@ WantedBy=multi-user.target
 ## daily price fetching
 ### nano /etc/systemd/system/chargeReportingPriceFetch.timer
 [Unit]
+Description=Run chargeReporting dayly
+
+[Timer]
+OnCalendar=*-*-* 5:00:00
+Persistant=true
+
+[Install]
+WantedBy=timers.target
+
+### nano /etc/systemd/system/chargeReportingPriceFetch.service
+[Unit]
 Description=chargeReporting save tibber prices to db
 
 [Service]
