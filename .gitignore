@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs/chargeReporting
+/chargeReporting/bin
+/chargeReporting/obj
+*.user
+/chargeReporting/Properties/launchSettings.json
