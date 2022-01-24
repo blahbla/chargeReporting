@@ -75,9 +75,9 @@ namespace chargeReporting.Models
         private static async Task<PriceResult> GetPriceResult(string chargerId)
         {
             var today = DateTime.Now;
-            DateOnly start = new DateOnly(today.Year, today.Month, 1);
-            DateTime nextmonth = today.AddMonths(1);
-            DateOnly end = new DateOnly(nextmonth.Year, nextmonth.Month, 1);
+            DateOnly end = new DateOnly(today.Year, today.Month, 1);
+            DateTime prevmonth = today.AddMonths(-1);
+            DateOnly start = new DateOnly(prevmonth.Year, prevmonth.Month, 1);
             string url = "https://api.zaptec.com/api/chargehistory?ChargerId=" + chargerId +
                          "&From=" + start.ToString("yyyy-MM-dd")
                          + "T00%3A00%3A00Z&To=" + end.ToString("yyyy-MM-dd")

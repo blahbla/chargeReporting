@@ -31,7 +31,7 @@ namespace chargeReporting
             [Option('z', "zaptecpassword", Required = false, HelpText = "zaptec password")]
             public string ZaptecPassword { get; set; }
 
-            [Option('t', "tibberkey", Required = false, HelpText = "tibber api key")]
+            [Option('t', "tibberkey", Required = false, HelpText = "tibber api key, used for daily price fetching")]
             public string TibberKey { get; set; }
 
         }

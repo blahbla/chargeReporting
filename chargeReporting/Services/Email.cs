@@ -60,7 +60,7 @@ namespace chargeReporting.Services
 
         private void SendEmail(string email, string body, string subject)
         {
-            var smtpClient = new SmtpClient()
+            var smtpClient = new SmtpClient(_smtp)
             {
                 Port = 25,
                 //Credentials = new NetworkCredential("email", "password"),
