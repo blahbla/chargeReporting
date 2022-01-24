@@ -1,8 +1,8 @@
 # dependencies 
-probably only useful for norway
-mysql db
-tibber subscription 
-zaptec car chargers
+probably only useful for norway,
+mysql db,
+tibber subscription,
+zaptec car chargers,
 
 # about
 For norwegian zaptec pro car charger installation on a common grid. 
