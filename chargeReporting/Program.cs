@@ -34,6 +34,9 @@ namespace chargeReporting
             [Option('t', "tibberkey", Required = false, HelpText = "tibber api key, used for daily price fetching")]
             public string TibberKey { get; set; }
 
+            [Option('c', "currentmonth", Required = false, HelpText = "get reports of current month instead of previous month")]
+            public bool CurrentMonth { get; set; }
+
         }
 
         static async Task Main(string[] args)
@@ -53,7 +56,7 @@ namespace chargeReporting
                         return;
                     }
 
-                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp).Wait();
+                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth).Wait();
 
                 });
             }
