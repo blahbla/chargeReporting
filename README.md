@@ -24,7 +24,7 @@ Description=Run chargeReporting monthly to calculate prices and send bills
 
 [Timer]
 
-OnCalendar=*-*-* 1:00:00
+OnCalendar=&ast; &ast;-&ast;-01 1:00:00
 
 Persistant=true
 
@@ -61,7 +61,7 @@ Description=Run chargeReporting dayly
 
 [Timer]
 
-OnCalendar=*-*-* 5:00:00
+OnCalendar=&ast;-&ast;-&ast; 5:00:00
 
 Persistant=true
 
