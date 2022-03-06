@@ -16,7 +16,7 @@ namespace chargeReporting
             [Option('p', "prices", Required = false, HelpText = "get todays prices from tibber graphql api, when this parameter specified it will only run price fetch")]
             public bool GetPrices { get; set; }
 
-            [Option('e', "emails",Required = false, HelpText = "comma separted list, map zaptec name to email. for summary emails see example. \"P1 - John Doe->xyz99@something.com\",\"summary->admin@something.com\"")]
+            [Option('e', "emails",Required = false, HelpText = "space separted list, map zaptec name to email. for summary emails see example. \"P1 - John Doe->xyz99@something.com\" \"summary->admin@something.com\"")]
             public IEnumerable<string> EmailMappings { get; set; }
 
             [Option('f', "from", Required = false, HelpText = "email from address")]
@@ -37,6 +37,9 @@ namespace chargeReporting
             [Option('c', "currentmonth", Required = false, HelpText = "get reports of current month instead of previous month")]
             public bool CurrentMonth { get; set; }
 
+            [Option('a', "addemailtxt", Required = false, HelpText = "Additional text for bill emails")]
+            public string EmailText { get; set; }
+
         }
 
         static async Task Main(string[] args)
@@ -56,7 +59,7 @@ namespace chargeReporting
                         return;
                     }
 
-                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth).Wait();
+                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText).Wait();
 
                 });
             }

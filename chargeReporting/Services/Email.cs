@@ -15,12 +15,14 @@ namespace chargeReporting.Services
         private string _from;
         private string _smtp;
         private IEnumerable<string> _emails;
+        private string _emailtext;
 
-        public Email(string from, string smtp, IEnumerable<string> emails)
+        public Email(string from, string smtp, IEnumerable<string> emails, string emailtext)
         {
             _from = from;
             _smtp = smtp;
             _emails = emails;
+            _emailtext = emailtext;
         }
 
         public void SendSummary(List<Zaptec.PriceResult> priceResults)
@@ -47,10 +49,12 @@ namespace chargeReporting.Services
             string body = "";
             foreach (var p in priceResults)
             {
-                body += p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 2).ToString()
-                        + ", kostnad: " + Math.Round(p.Price, 2).ToString() + ",-" + System.Environment.NewLine;
+                body += p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 0).ToString()
+                        + ", kostnad: " + Math.Round(p.Price, 0).ToString() + ",-" + System.Environment.NewLine;
             }
 
+            body += System.Environment.NewLine + System.Environment.NewLine + _emailtext;
+            
             foreach (var e in billEmails)
             {
                 var email = e.Remove(0, e.IndexOf("->")+2);

@@ -21,7 +21,7 @@ namespace chargeReporting.Models
     {
         static WebClient _client;
 
-        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth)
+        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext)
         {
             string bToken = await GetToken(user, password);
             _client = new WebClient();
@@ -53,7 +53,7 @@ namespace chargeReporting.Models
                 priceResults.Add(priceResult);
             }
 
-            Email email = new Email(from, smtp, emailMappings);
+            Email email = new Email(from, smtp, emailMappings, emailtext);
 
             //send summary email
             email.SendSummary(priceResults);
