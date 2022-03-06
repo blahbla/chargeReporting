@@ -24,8 +24,7 @@ Description=Run chargeReporting monthly to calculate prices and send bills
 
 [Timer]
 
-OnCalendar=*-*-* 1:00:00
-
+OnCalendar=&ast; &ast;-&ast;-01 1:00:00
 Persistant=true
 
 
@@ -41,9 +40,7 @@ Description=chargeReporting calculate prices and send bills
 [Service]
 
 User=root
-
 WorkingDirectory=/usr/local/bin
-
 ExecStart=/usr/local/bin/chargeReporting -d "server=***;port=3306;user=***;password=***;database=***;SSL Mode=None" --emails "P1 - John Doe->xyz99@something.com","summary->admin@something.com" -f "sender@somewhere.com" -s "somesmtp.com" -u zaptecapiuser -p zaptecapipassword
 
 
@@ -61,10 +58,8 @@ Description=Run chargeReporting dayly
 
 [Timer]
 
-OnCalendar=*-*-* 5:00:00
-
+OnCalendar=&ast;-&ast;-&ast; 5:00:00
 Persistant=true
-
 
 [Install]
 
@@ -80,9 +75,7 @@ Description=chargeReporting save tibber prices to db
 [Service]
 
 User=root
-
 WorkingDirectory=/usr/local/bin
-
 ExecStart=/usr/local/bin/chargeReporting -p -d "server=***;port=3306;user=***;password=***;database=***;SSL Mode=None" -t ***
 
 
