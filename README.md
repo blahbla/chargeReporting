@@ -18,48 +18,75 @@ Data - Name
 ##send bills and summary reports
 ### nano /etc/systemd/system/chargeReportingBills.timer
 [Unit]
+
 Description=Run chargeReporting monthly to calculate prices and send bills
 
+
 [Timer]
+
 OnCalendar=*-*-* 1:00:00
+
 Persistant=true
 
+
 [Install]
+
 WantedBy=timers.target
 
 ### nano /etc/systemd/system/chargeReportingBills.service
 [Unit]
+
 Description=chargeReporting calculate prices and send bills
 
 [Service]
+
 User=root
+
 WorkingDirectory=/usr/local/bin
+
 ExecStart=/usr/local/bin/chargeReporting -d "server=***;port=3306;user=***;password=***;database=***;SSL Mode=None" --emails "P1 - John Doe->xyz99@something.com","summary->admin@something.com" -f "sender@somewhere.com" -s "somesmtp.com" -u zaptecapiuser -p zaptecapipassword
 
+
 [Install]
+
 WantedBy=multi-user.target
+
 
 ## daily price fetching
 ### nano /etc/systemd/system/chargeReportingPriceFetch.timer
 [Unit]
+
 Description=Run chargeReporting dayly
 
+
 [Timer]
+
 OnCalendar=*-*-* 5:00:00
+
 Persistant=true
 
+
 [Install]
+
 WantedBy=timers.target
+
 
 ### nano /etc/systemd/system/chargeReportingPriceFetch.service
 [Unit]
+
 Description=chargeReporting save tibber prices to db
 
+
 [Service]
+
 User=root
+
 WorkingDirectory=/usr/local/bin
+
 ExecStart=/usr/local/bin/chargeReporting -p -d "server=***;port=3306;user=***;password=***;database=***;SSL Mode=None" -t ***
 
+
 [Install]
+
 WantedBy=multi-user.target
 
