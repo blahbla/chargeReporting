@@ -44,21 +44,20 @@ namespace chargeReporting.Services
 
         public void SendBills(List<Zaptec.PriceResult> priceResults)
         {
-            var billEmails = _emails.ToList().Where(e => !e.StartsWith("summary"));
-
             string body = "";
             foreach (var p in priceResults)
             {
-                body += p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 0).ToString()
-                        + ", kostnad: " + Math.Round(p.Price, 0).ToString() + ",-" + System.Environment.NewLine;
-            }
+                if(p.Name==null) continue;
 
-            body += System.Environment.NewLine + System.Environment.NewLine + _emailtext;
-            
-            foreach (var e in billEmails)
-            {
-                var email = e.Remove(0, e.IndexOf("->")+2);
-                SendEmail(email, body, "regning for strømforbruk på elbil lading: "+DateTime.Now.AddMonths(-1).ToString("MMMM"));
+                body = p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 0).ToString()
+                        + ", kostnad: " + Math.Round(p.Price, 0).ToString() + ",-" + System.Environment.NewLine;
+
+                body += System.Environment.NewLine + System.Environment.NewLine + _emailtext;
+
+                var email = _emails.ToList().Where(e => e.IndexOf(p.Name)>-1).FirstOrDefault();
+                if(email == null) continue;
+
+                SendEmail(email.Remove(0, email.IndexOf("->") + 2), body, "regning for strømforbruk på elbil lading: "+DateTime.Now.AddMonths(-1).ToString("MMMM"));
             }
         }
 
