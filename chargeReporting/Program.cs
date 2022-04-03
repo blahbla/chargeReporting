@@ -40,6 +40,9 @@ namespace chargeReporting
             [Option('a', "addemailtxt", Required = false, HelpText = "Additional text for bill emails")]
             public string EmailText { get; set; }
 
+            [Option('g', "grid", Required = false, Default = false, HelpText = "Add grid rent, default false")]
+            public bool GridRent { get; set; }
+
         }
 
         static async Task Main(string[] args)
@@ -59,7 +62,7 @@ namespace chargeReporting
                         return;
                     }
 
-                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText).Wait();
+                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText, o.GridRent).Wait();
 
                 });
             }

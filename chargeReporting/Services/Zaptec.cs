@@ -21,7 +21,7 @@ namespace chargeReporting.Models
     {
         static WebClient _client;
 
-        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext)
+        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext, bool gridRent)
         {
             string bToken = await GetToken(user, password);
             _client = new WebClient();
@@ -45,7 +45,7 @@ namespace chargeReporting.Models
 
             foreach (var d in chargers.Data)
             {
-                PriceResult priceResult = await GetPriceResult(d.Id, start, end);
+                PriceResult priceResult = await GetPriceResult(d.Id, start, end, gridRent);
                 
                 if(priceResult.Price == 0) continue;
 
@@ -83,7 +83,7 @@ namespace chargeReporting.Models
         /// 
         /// </summary>
         /// <param name="chargerId"></param>
-        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end)
+        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end, bool gridRent)
         {
             string url = "https://api.zaptec.com/api/chargehistory?ChargerId=" + chargerId +
                          "&From=" + start.ToString("yyyy-MM-dd")
@@ -132,9 +132,10 @@ namespace chargeReporting.Models
 
                     string strDate = t.TM.ToString("yyyyMMddHH");
                     DateTime queryDate = DateTime.ParseExact(strDate, "yyyyMMddHH", CultureInfo.CreateSpecificCulture("nb-NO"));
-                    var hourPrice = await TibberService.getPrice(queryDate.AddHours(-1)) + GridRent.GetVariable(queryDate);
+                    var hourPrice = await TibberService.getPrice(queryDate.AddHours(-1));
+                    if(gridRent) hourPrice += GridRent.GetVariable(queryDate);
                     if (hourPrice>0)
-                        totalPrice += hourPrice * hourKw; //TODO: add nettleie
+                        totalPrice += hourPrice * hourKw;
 
                     totalKw += hourKw;
 
@@ -146,10 +147,11 @@ namespace chargeReporting.Models
                 string strDateLast = signedSession.RD.Last().TM.ToString("yyyyMMddHH");
                 DateTime queryDateLast = DateTime.ParseExact(strDateLast, "yyyyMMddHH", CultureInfo.CreateSpecificCulture("nb-NO"));
                 var lastHourPrice = await TibberService.getPrice(queryDateLast);
+                if (gridRent) lastHourPrice += GridRent.GetVariable(queryDateLast);
 
                 hourKw = Convert.ToDouble(signedSession.RD.Last().RV, CultureInfo.InvariantCulture) - kwSubtract;
 
-                totalPrice += lastHourPrice * hourKw; //TODO: add nettleie
+                totalPrice += lastHourPrice * hourKw; 
                 totalKw += hourKw;
             }
 
