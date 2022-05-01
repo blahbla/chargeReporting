@@ -43,7 +43,7 @@ namespace chargeReporting
             [Option('g', "grid", Required = false, Default = false, HelpText = "Add grid rent, default false")]
             public bool GridRent { get; set; }
 
-            [Option('v', "volte", Required = false, HelpText = "Volte api key")]
+            [Option('v', "volte", Required = false, Default = "", HelpText = "Volte api key")]
             public string Volte { get; set; }
 
 

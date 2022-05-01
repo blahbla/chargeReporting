@@ -32,14 +32,14 @@ namespace chargeReporting.Services
             JArray deserializeObject = JsonConvert.DeserializeObject<JArray>(response);
 
             List<VoltePrice> voltePrices = new List<VoltePrice>();
-            double volteMarkup = GetVolteMarkup();
+            //double volteMarkup = GetVolteMarkup();
 
             foreach (JToken jToken in deserializeObject)
             {
                 VoltePrice price = new VoltePrice();
                 if (jToken.First != null) price.date = jToken.First.ToObject<DateTime>();
                 if (jToken.Last != null) price.spot = jToken.Last.ToObject<double>()/1000;
-                if (jToken.Last != null) price.total = (jToken.Last.ToObject<double>()/1000) + volteMarkup;
+                if (jToken.Last != null) price.total = (jToken.Last.ToObject<double>() / 1000) * 1.25; // + volteMarkup;
 
                 voltePrices.Add(price);
             }
@@ -47,6 +47,7 @@ namespace chargeReporting.Services
             return voltePrices;
         }
 
+        //seems to be already included
         public double GetVolteMarkup()
         {
             //TODO: maybe later, for now fixed value
