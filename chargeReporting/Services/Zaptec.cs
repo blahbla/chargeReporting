@@ -21,7 +21,7 @@ namespace chargeReporting.Models
     {
         static WebClient _client;
 
-        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext, bool gridRent)
+        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext, bool gridRent, string volte)
         {
             string bToken = await GetToken(user, password);
             _client = new WebClient();
@@ -45,7 +45,7 @@ namespace chargeReporting.Models
 
             foreach (var d in chargers.Data)
             {
-                PriceResult priceResult = await GetPriceResult(d.Id, start, end, gridRent);
+                PriceResult priceResult = await GetPriceResult(d.Id, start, end, gridRent, volte);
                 
                 if(priceResult.Price == 0) continue;
 
@@ -83,7 +83,7 @@ namespace chargeReporting.Models
         /// 
         /// </summary>
         /// <param name="chargerId"></param>
-        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end, bool gridRent)
+        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end, bool gridRent, string voltekey)
         {
             string url = "https://api.zaptec.com/api/chargehistory?ChargerId=" + chargerId +
                          "&From=" + start.ToString("yyyy-MM-dd")
@@ -95,6 +95,13 @@ namespace chargeReporting.Models
             var session = JsonSerializer.Deserialize<Chargehistory>(response);
 
             if (session == null) return new PriceResult();
+
+            List<Volte.VoltePrice> voltePrices = new List<Volte.VoltePrice>();
+            if (!voltekey.Equals(""))
+            {
+                Volte volte = new Volte(voltekey);
+                voltePrices = await volte.GetSpotPrices(start.AddDays(-7), end); //fetch longer back in case somebody started session previous month
+            }
 
             double totalKw = 0;
             double totalPrice = 0;
@@ -132,8 +139,19 @@ namespace chargeReporting.Models
 
                     string strDate = t.TM.ToString("yyyyMMddHH");
                     DateTime queryDate = DateTime.ParseExact(strDate, "yyyyMMddHH", CultureInfo.CreateSpecificCulture("nb-NO"));
-                    var hourPrice = await TibberService.getPrice(queryDate.AddHours(-1));
-                    if(gridRent) hourPrice += GridRent.GetVariable(queryDate);
+
+                    double hourPrice = 0;
+
+                    if (!voltekey.Equals(""))
+                    {
+                        hourPrice = voltePrices.Single(v => v.date == queryDate.AddHours(-1)).total;
+                    }
+                    else
+                    {
+                        hourPrice = await Services.Tibber.getPrice(queryDate.AddHours(-1));
+                    }
+
+                    if (gridRent) hourPrice += GridRent.GetVariable(queryDate);
                     if (hourPrice>0)
                         totalPrice += hourPrice * hourKw;
 
@@ -146,7 +164,18 @@ namespace chargeReporting.Models
                 //add price for last hour
                 string strDateLast = signedSession.RD.Last().TM.ToString("yyyyMMddHH");
                 DateTime queryDateLast = DateTime.ParseExact(strDateLast, "yyyyMMddHH", CultureInfo.CreateSpecificCulture("nb-NO"));
-                var lastHourPrice = await TibberService.getPrice(queryDateLast);
+
+                double lastHourPrice = 0;
+                if (!voltekey.Equals(""))
+                {
+                    lastHourPrice = voltePrices.Single(v => v.date == queryDateLast).total;
+                }
+                else
+                {
+                     lastHourPrice = await Services.Tibber.getPrice(queryDateLast);
+                }
+
+
                 if (gridRent) lastHourPrice += GridRent.GetVariable(queryDateLast);
 
                 hourKw = Convert.ToDouble(signedSession.RD.Last().RV, CultureInfo.InvariantCulture) - kwSubtract;

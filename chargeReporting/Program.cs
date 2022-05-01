@@ -10,7 +10,7 @@ namespace chargeReporting
     {
         public class Options
         {
-            [Option('d', "db", Required = true, HelpText = "mysql db connection string to store prices from tibber")]
+            [Option('d', "db", Required = false, HelpText = "mysql db connection string to store prices from tibber")]
             public string MySqlConnectionString { get; set; }
 
             [Option('p', "prices", Required = false, HelpText = "get todays prices from tibber graphql api, when this parameter specified it will only run price fetch")]
@@ -31,7 +31,7 @@ namespace chargeReporting
             [Option('z', "zaptecpassword", Required = false, HelpText = "zaptec password")]
             public string ZaptecPassword { get; set; }
 
-            [Option('t', "tibberkey", Required = false, HelpText = "tibber api key, used for daily price fetching")]
+            [Option('t', "tibberkey", Required = false, HelpText = "tibber api key")]
             public string TibberKey { get; set; }
 
             [Option('c', "currentmonth", Required = false, HelpText = "get reports of current month instead of previous month")]
@@ -42,6 +42,10 @@ namespace chargeReporting
 
             [Option('g', "grid", Required = false, Default = false, HelpText = "Add grid rent, default false")]
             public bool GridRent { get; set; }
+
+            [Option('v', "volte", Required = false, HelpText = "Volte api key")]
+            public string Volte { get; set; }
+
 
         }
 
@@ -58,11 +62,11 @@ namespace chargeReporting
 
                     if (o.GetPrices)
                     {
-                        TibberService.SaveTodaysPrices(o.TibberKey).Wait();
+                        Services.Tibber.SaveTodaysPrices(o.TibberKey).Wait();
                         return;
                     }
 
-                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText, o.GridRent).Wait();
+                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText, o.GridRent, o.Volte).Wait();
 
                 });
             }

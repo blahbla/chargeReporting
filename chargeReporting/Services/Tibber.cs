@@ -12,7 +12,7 @@ using Dapper;
 
 namespace chargeReporting.Services
 {
-    public class TibberService
+    public class Tibber
     {
         public static async Task SaveTodaysPrices(string key)
         {
