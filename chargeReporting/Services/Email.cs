@@ -63,14 +63,28 @@ namespace chargeReporting.Services
 
         private void SendEmail(string email, string body, string subject)
         {
+            MailMessage mail = new MailMessage()
+            {
+                From = new MailAddress(_from),
+                Subject = subject,
+                Body = body,
+                Priority = MailPriority.Normal
+            };
+            mail.To.Add(email);
+
+            mail.Headers.Add("Message-Id",
+                         String.Format("<{0}@{1}>",
+                         Guid.NewGuid().ToString(),
+                        _smtp));
+
             var smtpClient = new SmtpClient(_smtp)
             {
                 Port = 25,
                 //Credentials = new NetworkCredential("email", "password"),
-                //EnableSsl = true,
+                //EnableSsl = true,               
             };
 
-            smtpClient.Send(_from, email, subject, body);
+            smtpClient.Send(mail);
 
         }
     }
