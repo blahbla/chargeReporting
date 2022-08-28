@@ -14,6 +14,7 @@ namespace chargeReporting.Services
     public class Volte
     {
         static WebClient _client;
+        public static double AvgPrice { get; set; }
 
         public Volte(string voltekey)
         {
@@ -44,8 +45,12 @@ namespace chargeReporting.Services
                 voltePrices.Add(price);
             }
 
+            //get average from list object
+            AvgPrice = voltePrices.Average(x => x.spot);
+
             return voltePrices;
         }
+
 
         //seems to be already included
         public double GetVolteMarkup()
@@ -62,6 +67,7 @@ namespace chargeReporting.Services
             public DateTime date { get; set; }
             public double spot { get; set; }
             public double total { get; set; }
+            public double subsidization { get; set; }
         }
 
         public class VolteMarkup

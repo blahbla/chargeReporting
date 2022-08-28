@@ -46,6 +46,8 @@ namespace chargeReporting
             [Option('v', "volte", Required = false, Default = "", HelpText = "Volte api key")]
             public string Volte { get; set; }
 
+            [Option('b', "subsidization", Required = false, Default = "", HelpText = "Power subsidization from norwegian government")]
+            public bool Subsidization { get; set; }
 
         }
 

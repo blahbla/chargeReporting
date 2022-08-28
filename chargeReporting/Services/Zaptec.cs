@@ -21,7 +21,7 @@ namespace chargeReporting.Models
     {
         static WebClient _client;
 
-        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext, bool gridRent, string volte)
+        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext, bool gridRent, string volte, bool subsidization)
         {
             string bToken = await GetToken(user, password);
             _client = new WebClient();
@@ -83,7 +83,7 @@ namespace chargeReporting.Models
         /// 
         /// </summary>
         /// <param name="chargerId"></param>
-        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end, bool gridRent, string voltekey)
+        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end, bool gridRent, string voltekey, bool subsidization)
         {
             string url = "https://api.zaptec.com/api/chargehistory?ChargerId=" + chargerId +
                          "&From=" + start.ToString("yyyy-MM-dd")
@@ -101,10 +101,14 @@ namespace chargeReporting.Models
             {
                 Volte volte = new Volte(voltekey);
                 voltePrices = await volte.GetSpotPrices(start.AddDays(-7), end); //fetch longer back in case somebody started session previous month
+
+                
             }
 
             double totalKw = 0;
             double totalPrice = 0;
+            double totalSubsidized = 0;
+
             foreach (ChargeHistoryData d in session.Data)
             {
                 var signedSessionStr = d.SignedSession.Remove(0, 5);
@@ -145,10 +149,27 @@ namespace chargeReporting.Models
                     if (!voltekey.Equals(""))
                     {
                         hourPrice = voltePrices.Single(v => v.date == queryDate.AddHours(-1)).total;
+
+                        
                     }
                     else
                     {
                         hourPrice = await Services.Tibber.getPrice(queryDate.AddHours(-1));
+                    }
+
+                    double subsidized = 0;
+                    if (subsidization)
+                    {
+                        double subsidizationLimit = 0.7;
+                        double subsidizationFactor = 0.9;
+                        if (hourPrice > subsidizationLimit)
+                        {
+                            //maximum subsidization is monthly avg for some reason
+                            var sPrice = hourPrice;
+                            if(sPrice>Volte.AvgPrice)sPrice = Volte.AvgPrice;
+                            subsidized = (sPrice - subsidizationLimit)*subsidizationFactor;
+                            totalSubsidized += subsidized;
+                        }
                     }
 
                     if (gridRent) hourPrice += GridRent.GetVariable(queryDate);
@@ -187,7 +208,8 @@ namespace chargeReporting.Models
             PriceResult res = new PriceResult();
             res.Price = totalPrice;
             res.TotalKw = totalKw;
-            
+            res.Subsidization = totalSubsidized;
+
             return res;
         }
 
@@ -195,6 +217,7 @@ namespace chargeReporting.Models
         {
             public double Price { get; set; }
             public double TotalKw { get; set; }
+            public double Subsidization { get; set; }
             public string? Name { get; set; }
         }
 
