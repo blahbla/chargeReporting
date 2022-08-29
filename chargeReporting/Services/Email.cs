@@ -31,10 +31,10 @@ namespace chargeReporting.Services
             string body = "";
             foreach (var p in priceResults)
             {
-                body += p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) 
-                        + ", kostnad: " + Math.Round(p.Price, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
-                        + ", strømstøtte: " + Math.Round(p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
-                        +", å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-<br>";
+                body += p.Name + " | antall kWh: " + Math.Round(p.TotalKw, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) 
+                        + " | kostnad: " + Math.Round(p.Price, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
+                        + " | strømstøtte: " + Math.Round(p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
+                        +" | å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-<br>";
             }
 
             foreach (var e in summaryEmails)

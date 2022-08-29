@@ -146,10 +146,12 @@ namespace chargeReporting.Models
                     DateTime queryDate = DateTime.ParseExact(strDate, "yyyyMMddHH", CultureInfo.CreateSpecificCulture("nb-NO"));
 
                     double hourPrice = 0;
+                    double hourPriceExTax = 0;
 
                     if (!voltekey.Equals(""))
                     {
                         hourPrice = voltePrices.Single(v => v.date == queryDate.AddHours(-1)).total;                        
+                        hourPriceExTax = voltePrices.Single(v => v.date == queryDate.AddHours(-1)).spot;                        
                     }
                     else
                     {
@@ -161,11 +163,10 @@ namespace chargeReporting.Models
                     {
                         double subsidizationLimit = 0.7;
                         double subsidizationFactor = (double)subsidization / 100; //0.9;
-                        if (hourPrice > subsidizationLimit)
+                        if (hourPriceExTax > subsidizationLimit)
                         {                            
-                            var sPrice = hourPrice;
-                            if(sPrice>Volte.AvgPrice)sPrice = Volte.AvgPrice;//maximum subsidization is monthly avg for some reason
-                            subsidized = ((sPrice - subsidizationLimit)*subsidizationFactor) * hourKw;
+                            if(hourPriceExTax > Volte.AvgPrice) hourPriceExTax = Volte.AvgPrice;//maximum subsidization is monthly avg for some reason
+                            subsidized = ((hourPriceExTax - subsidizationLimit)*subsidizationFactor) * hourKw;
                             totalSubsidized += subsidized;
                         }
                     }
