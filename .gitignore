@@ -8,3 +8,5 @@
 *.user
 /chargeReporting/Properties/launchSettings.json
 /.vs/ProjectEvaluation
+/chargeReporting/Services/.vscode
+/chargeReporting/HTMLPage1.html

@@ -37,7 +37,7 @@ namespace chargeReporting
             [Option('c', "currentmonth", Required = false, HelpText = "get reports of current month instead of previous month")]
             public bool CurrentMonth { get; set; }
 
-            [Option('a', "addemailtxt", Required = false, HelpText = "Additional text for bill emails")]
+            [Option('a', "addemailtxt", Required = false, HelpText = "Bank account number for bills")]
             public string EmailText { get; set; }
 
             [Option('g', "grid", Required = false, Default = false, HelpText = "Add grid rent, default false")]
@@ -46,8 +46,8 @@ namespace chargeReporting
             [Option('v', "volte", Required = false, Default = "", HelpText = "Volte api key")]
             public string Volte { get; set; }
 
-            [Option('b', "subsidization", Required = false, Default = "", HelpText = "Power subsidization from norwegian government")]
-            public bool Subsidization { get; set; }
+            [Option('b', "subsidization", Required = false, Default = "", HelpText = "Power subsidization percentage from norwegian government")]
+            public int Subsidization { get; set; }
 
         }
 
@@ -68,7 +68,7 @@ namespace chargeReporting
                         return;
                     }
 
-                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText, o.GridRent, o.Volte).Wait();
+                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText, o.GridRent, o.Volte, o.Subsidization).Wait();
 
                 });
             }

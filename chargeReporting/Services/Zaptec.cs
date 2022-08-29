@@ -21,7 +21,8 @@ namespace chargeReporting.Models
     {
         static WebClient _client;
 
-        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, string smtp, bool currentMonth, string emailtext, bool gridRent, string volte, bool subsidization)
+        public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, 
+            string smtp, bool currentMonth, string emailtext, bool gridRent, string volte, int subsidization)
         {
             string bToken = await GetToken(user, password);
             _client = new WebClient();
@@ -45,7 +46,7 @@ namespace chargeReporting.Models
 
             foreach (var d in chargers.Data)
             {
-                PriceResult priceResult = await GetPriceResult(d.Id, start, end, gridRent, volte);
+                PriceResult priceResult = await GetPriceResult(d.Id, start, end, gridRent, volte, subsidization);
                 
                 if(priceResult.Price == 0) continue;
 
@@ -83,7 +84,7 @@ namespace chargeReporting.Models
         /// 
         /// </summary>
         /// <param name="chargerId"></param>
-        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end, bool gridRent, string voltekey, bool subsidization)
+        private static async Task<PriceResult> GetPriceResult(string chargerId, DateOnly start, DateOnly end, bool gridRent, string voltekey, int subsidization)
         {
             string url = "https://api.zaptec.com/api/chargehistory?ChargerId=" + chargerId +
                          "&From=" + start.ToString("yyyy-MM-dd")
@@ -148,9 +149,7 @@ namespace chargeReporting.Models
 
                     if (!voltekey.Equals(""))
                     {
-                        hourPrice = voltePrices.Single(v => v.date == queryDate.AddHours(-1)).total;
-
-                        
+                        hourPrice = voltePrices.Single(v => v.date == queryDate.AddHours(-1)).total;                        
                     }
                     else
                     {
@@ -158,16 +157,15 @@ namespace chargeReporting.Models
                     }
 
                     double subsidized = 0;
-                    if (subsidization)
+                    if (subsidization>0)
                     {
                         double subsidizationLimit = 0.7;
-                        double subsidizationFactor = 0.9;
+                        double subsidizationFactor = (double)subsidization / 100; //0.9;
                         if (hourPrice > subsidizationLimit)
-                        {
-                            //maximum subsidization is monthly avg for some reason
+                        {                            
                             var sPrice = hourPrice;
-                            if(sPrice>Volte.AvgPrice)sPrice = Volte.AvgPrice;
-                            subsidized = (sPrice - subsidizationLimit)*subsidizationFactor;
+                            if(sPrice>Volte.AvgPrice)sPrice = Volte.AvgPrice;//maximum subsidization is monthly avg for some reason
+                            subsidized = ((sPrice - subsidizationLimit)*subsidizationFactor) * hourKw;
                             totalSubsidized += subsidized;
                         }
                     }

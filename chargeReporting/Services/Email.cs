@@ -31,8 +31,10 @@ namespace chargeReporting.Services
             string body = "";
             foreach (var p in priceResults)
             {
-                body += p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 2).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) 
-                        + ", kostnad: " + Math.Round(p.Price, 2).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-" + System.Environment.NewLine;
+                body += p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) 
+                        + ", kostnad: " + Math.Round(p.Price, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
+                        + ", strømstøtte: " + Math.Round(p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
+                        +", å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-<br>";
             }
 
             foreach (var e in summaryEmails)
@@ -44,20 +46,43 @@ namespace chargeReporting.Services
 
         public void SendBills(List<Zaptec.PriceResult> priceResults)
         {
-            string body = "";
+            string body = "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta charset=\"utf-8\" /><title>Elbil lading faktura</title></head><body>Fakturadato: "+DateTime.Now.ToShortDateString()+"<br>";
             foreach (var p in priceResults)
             {
                 if(p.Name==null) continue;
 
-                body = p.Name + ", antall kWh: " + Math.Round(p.TotalKw, 0).ToString()
-                        + ", kostnad: " + Math.Round(p.Price, 0).ToString() + ",-" + System.Environment.NewLine;
+                body = p.Name + "<br>kWh: " + Math.Round(p.TotalKw, 0).ToString()
+                        + "<br>kostnad: " + Math.Round(p.Price, 0).ToString() + ",-"
+                        + "<br>strømstøtten: " + Math.Round(p.Subsidization, 0).ToString() + ",-"; 
+                        //+ "<br>å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString() + ",-";
 
-                body += System.Environment.NewLine + System.Environment.NewLine + _emailtext;
+                body += @"<br><br><br><br><table style=""border: 0px solid black; width: 600px; border-spacing: 0; border-collapse: collapse; "">
+<tr>
+    <td colspan=""2"">Betalingsinformasjon</td>
+    <td>Betalingsfrist</td>
+</tr>
+<tr>
+    <td colspan=""2"">" + p.Name+@"<br /><br /><br /></td>
+    <td>"+ DateTime.Now.AddDays(10).ToString("dd.MM.yyyy") + @"<br><br><br></td>
+</tr>
+<tr style=""border: 0px solid black;"">
+    <td style=""border: 0px solid black; border-left: 1px solid black;"">Kundeidentifikasjon (KID)</td>
+    <td style=""border: 0px solid black; border-left: 1px solid black;"">Kroner</td>
+    <td style=""border: 0px solid black; border-left: 1px solid black;"">Til konto</td>
+</tr>
+<tr style=""border: 0px solid black;"">
+    <td style=""border: 0px solid black; border-left: 1px solid black;""></td>
+    <td style=""border: 0px solid black; border-left: 1px solid black;"">"+ Math.Round(p.Price - p.Subsidization, 0).ToString() + @"</td>
+    <td style=""border: 0px solid black; border-left: 1px solid black;"">"+ _emailtext + @"</td>
+</tr>
+</table>
+</body>
+</html>";
 
                 var email = _emails.ToList().Where(e => e.IndexOf(p.Name)>-1).FirstOrDefault();
                 if(email == null) continue;
 
-                SendEmail(email.Remove(0, email.IndexOf("->") + 2), body, "regning for strømforbruk på elbil lading: "+DateTime.Now.AddMonths(-1).ToString("MMMM"));
+                SendEmail(email.Remove(0, email.IndexOf("->") + 2), body, "Regning for elbil lading: "+DateTime.Now.AddMonths(-1).ToString("MMMM"));
             }
         }
 
@@ -68,7 +93,8 @@ namespace chargeReporting.Services
                 From = new MailAddress(_from),
                 Subject = subject,
                 Body = body,
-                Priority = MailPriority.Normal
+                Priority = MailPriority.Normal,
+                IsBodyHtml = true
             };
             mail.To.Add(email);
 
