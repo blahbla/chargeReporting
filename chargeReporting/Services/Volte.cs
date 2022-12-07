@@ -25,22 +25,23 @@ namespace chargeReporting.Services
 
         public async Task<List<VoltePrice>> GetSpotPrices(DateOnly from, DateOnly to)
         {
-            string url = "https://volte-web-prod.azurewebsites.net/api/prices/spot/?price_area=NO1&start="
+            //https://api.volte.no/api/v2/prices/spot/?price_areas=NO1&aggregator=NONE&resolution_unit=HOUR&resolution_value=0&start=2022-10-25T00:00&end=2022-12-01T00:00
+            string url = "https://api.volte.no/api/v2/prices/spot/?price_areas=NO1&aggregator=NONE&resolution_unit=HOUR&resolution_value=0&start="
                          + from.ToString("yyyy-MM-dd") + "T00%3A00&end="
                          + to.ToString("yyyy-MM-dd") + "T00%3A00";
             string response = _client.DownloadString(url);
 
-            JArray deserializeObject = JsonConvert.DeserializeObject<JArray>(response);
+            var deserializeObject = JsonConvert.DeserializeObject<JObject>(response);
 
             List<VoltePrice> voltePrices = new List<VoltePrice>();
             //double volteMarkup = GetVolteMarkup();
 
-            foreach (JToken jToken in deserializeObject)
+            foreach (JToken jToken in deserializeObject["response"][0]["data"])
             {
                 VoltePrice price = new VoltePrice();
-                if (jToken.First != null) price.date = jToken.First.ToObject<DateTime>();
-                if (jToken.Last != null) price.spot = jToken.Last.ToObject<double>()/1000;
-                if (jToken.Last != null) price.total = (jToken.Last.ToObject<double>() / 1000) * 1.25; // + volteMarkup;
+                if (jToken["timestamp"] != null) price.date = jToken["timestamp"].ToObject<DateTime>();
+                if (jToken["value"] != null) price.spot = jToken["value"].ToObject<double>()/1000;
+                if (jToken["value"] != null) price.total = (jToken["value"].ToObject<double>() / 1000) * 1.25; // + volteMarkup;
 
                 voltePrices.Add(price);
             }
