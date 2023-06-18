@@ -54,7 +54,7 @@ namespace chargeReporting.Models
                 priceResults.Add(priceResult);
             }
 
-            Email email = new Email(from, smtp, emailMappings, emailtext, smtpuser, smtppwd, smtpport);
+            Email email = new Email(from, smtp, emailMappings, emailtext, smtpuser, smtppwd, smtpport, numberOfMonths);
 
             //send summary email
             email.SendSummary(priceResults);

@@ -19,8 +19,10 @@ namespace chargeReporting.Services
         private string _smtpUser;
         private string _smtpPwd;
         private int _smtpPort;
+        private int _months;
+        private string _periodHeader;
 
-        public Email(string from, string smtp, IEnumerable<string> emails, string emailtext, string smtpUser, string smtpPwd, int SmtpPort)
+        public Email(string from, string smtp, IEnumerable<string> emails, string emailtext, string smtpUser, string smtpPwd, int smtpPort, int months)
         {
             _from = from;
             _smtp = smtp;
@@ -28,7 +30,13 @@ namespace chargeReporting.Services
             _emailtext = emailtext;
             _smtpUser = smtpUser;
             _smtpPwd = smtpPwd;
-            _smtpPort = SmtpPort;
+            _smtpPort = smtpPort;
+            _months = months;
+
+            _periodHeader = DateTime.Now.AddMonths(-1).ToString("MMMM");
+
+            if (months > 1)
+                _periodHeader = DateTime.Now.AddMonths(Math.Abs(_months) * -1).ToString("MMMM") + " til og med " + DateTime.Now.AddMonths(-1).ToString("MMMM");
         }
 
         public void SendSummary(List<Zaptec.PriceResult> priceResults)
@@ -37,30 +45,31 @@ namespace chargeReporting.Services
             string body = "";
             foreach (var p in priceResults)
             {
-                body += p.Name + " | antall kWh: " + Math.Round(p.TotalKw, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) 
+                body += p.Name + " | antall kWh: " + Math.Round(p.TotalKw, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO"))
                         + " | kostnad: " + Math.Round(p.Price, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
                         + " | strømstøtte: " + Math.Round(p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-"
-                        +" | å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-<br>";
+                        + " | å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString(CultureInfo.CreateSpecificCulture("nb-NO")) + ",-<br>";
             }
 
             foreach (var e in summaryEmails)
             {
                 var email = e.Replace("summary->", "");
-                SendEmail(email, body, "regnskap for strømforbruk lading: "+DateTime.Now.AddMonths(-1).ToString("MMMM"));
+                SendEmail(email, body, "regnskap for strømforbruk lading: " + _periodHeader);
             }
         }
 
         public void SendBills(List<Zaptec.PriceResult> priceResults)
         {
-            string body = "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta charset=\"utf-8\" /><title>Elbil lading faktura</title></head><body>Fakturadato: "+DateTime.Now.ToShortDateString()+"<br>";
+            string body = "<html lang=\"en\" xmlns=\"http://www.w3.org/1999/xhtml\"><head><meta charset=\"utf-8\" /><title>Elbil lading faktura</title></head><body>Fakturadato: " + DateTime.Now.ToShortDateString() + "<br>";
             foreach (var p in priceResults)
             {
-                if(p.Name==null) continue;
+                if (p.Name == null) continue;
 
                 body = p.Name + "<br>kWh: " + Math.Round(p.TotalKw, 0).ToString()
                         + "<br>kostnad: " + Math.Round(p.Price, 0).ToString() + ",-"
-                        + "<br>strømstøtten: " + Math.Round(p.Subsidization, 0).ToString() + ",-"; 
-                        //+ "<br>å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString() + ",-";
+                        + "<br>strømstøtten: " + Math.Round(p.Subsidization, 0).ToString() + ",-"
+                        + "<br>periode: " + _periodHeader;
+                //+ "<br>å betale: " + Math.Round(p.Price - p.Subsidization, 0).ToString() + ",-";
 
                 body += @"<br><br><br><br><table style=""border: 0px solid black; width: 600px; border-spacing: 0; border-collapse: collapse; "">
 <tr>
@@ -68,8 +77,8 @@ namespace chargeReporting.Services
     <td>Betalingsfrist</td>
 </tr>
 <tr>
-    <td colspan=""2"">" + p.Name+@"<br /><br /><br /></td>
-    <td>"+ DateTime.Now.AddDays(10).ToString("dd.MM.yyyy") + @"<br><br><br></td>
+    <td colspan=""2"">" + p.Name + @"<br /><br /><br /></td>
+    <td>" + DateTime.Now.AddDays(10).ToString("dd.MM.yyyy") + @"<br><br><br></td>
 </tr>
 <tr style=""border: 0px solid black;"">
     <td style=""border: 0px solid black; border-left: 1px solid black;"">Kundeidentifikasjon (KID)</td>
@@ -78,17 +87,17 @@ namespace chargeReporting.Services
 </tr>
 <tr style=""border: 0px solid black;"">
     <td style=""border: 0px solid black; border-left: 1px solid black;""></td>
-    <td style=""border: 0px solid black; border-left: 1px solid black;"">"+ Math.Round(p.Price - p.Subsidization, 0).ToString() + @"</td>
-    <td style=""border: 0px solid black; border-left: 1px solid black;"">"+ _emailtext + @"</td>
+    <td style=""border: 0px solid black; border-left: 1px solid black;"">" + Math.Round(p.Price - p.Subsidization, 0).ToString() + @"</td>
+    <td style=""border: 0px solid black; border-left: 1px solid black;"">" + _emailtext + @"</td>
 </tr>
 </table>
 </body>
 </html>";
 
-                var email = _emails.ToList().Where(e => e.IndexOf(p.Name)>-1).FirstOrDefault();
-                if(email == null) continue;
+                var email = _emails.ToList().Where(e => e.IndexOf(p.Name) > -1).FirstOrDefault();
+                if (email == null) continue;
 
-                SendEmail(email.Remove(0, email.IndexOf("->") + 2), body, "Regning for elbil lading: "+DateTime.Now.AddMonths(-1).ToString("MMMM"));
+                SendEmail(email.Remove(0, email.IndexOf("->") + 2), body, "Regning for elbil lading: " + _periodHeader);
             }
         }
 
@@ -114,13 +123,13 @@ namespace chargeReporting.Services
                 Host = _smtp,
                 Port = 25
             };
-            
-            if(_smtpPort != 0)
+
+            if (_smtpPort != 0)
             {
                 smtpClient.Port = _smtpPort;
             };
 
-            if(_smtpUser != "")
+            if (_smtpUser != "")
             {
                 smtpClient.Credentials = new NetworkCredential(_smtpUser, _smtpPwd);
                 smtpClient.EnableSsl = true;
