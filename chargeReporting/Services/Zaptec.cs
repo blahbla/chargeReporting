@@ -22,7 +22,7 @@ namespace chargeReporting.Models
         static WebClient _client;
 
         public static async Task MakeReport(IEnumerable<string> emailMappings, string user, string password, string from, 
-            string smtp, string smtpuser, string smtppwd, int smtpport, bool currentMonth, string emailtext, bool gridRent, string volte, int subsidization)
+            string smtp, string smtpuser, string smtppwd, int smtpport, bool currentMonth, string emailtext, bool gridRent, string volte, int subsidization, int numberOfMonths)
         {
             string bToken = await GetToken(user, password);
             _client = new WebClient();
@@ -35,7 +35,7 @@ namespace chargeReporting.Models
 
             var today = DateTime.Now;
             DateOnly end = new DateOnly(today.Year, today.Month, 1);
-            DateTime prevmonth = today.AddMonths(-1);
+            DateTime prevmonth = today.AddMonths(Math.Abs(numberOfMonths)*-1);
             DateOnly start = new DateOnly(prevmonth.Year, prevmonth.Month, 1);
 
             if (currentMonth)

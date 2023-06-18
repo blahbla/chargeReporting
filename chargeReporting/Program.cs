@@ -46,6 +46,9 @@ namespace chargeReporting
             [Option('c', "currentmonth", Required = false, HelpText = "get reports of current month instead of previous month")]
             public bool CurrentMonth { get; set; }
 
+            [Option('n', "numberofmonths", Required = false, HelpText = "get reports of specified number of months counting from the previous full month")]
+            public int NumberOfMonths { get; set; } = 1;
+
             [Option('a', "addemailtxt", Required = false, HelpText = "Bank account number for bills")]
             public string EmailText { get; set; }
 
@@ -77,7 +80,7 @@ namespace chargeReporting
                         return;
                     }
 
-                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.SmtpUser, o.SmtpPassword, o.SmtpPort, o.CurrentMonth, o.EmailText, o.GridRent, o.Volte, o.Subsidization).Wait();
+                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.SmtpUser, o.SmtpPassword, o.SmtpPort, o.CurrentMonth, o.EmailText, o.GridRent, o.Volte, o.Subsidization, o.NumberOfMonths).Wait();
 
                 });
             }
