@@ -16,13 +16,19 @@ namespace chargeReporting.Services
         private string _smtp;
         private IEnumerable<string> _emails;
         private string _emailtext;
+        private string _smtpUser;
+        private string _smtpPwd;
+        private int _smtpPort;
 
-        public Email(string from, string smtp, IEnumerable<string> emails, string emailtext)
+        public Email(string from, string smtp, IEnumerable<string> emails, string emailtext, string smtpUser, string smtpPwd, int SmtpPort)
         {
             _from = from;
             _smtp = smtp;
             _emails = emails;
             _emailtext = emailtext;
+            _smtpUser = smtpUser;
+            _smtpPwd = smtpPwd;
+            _smtpPort = SmtpPort;
         }
 
         public void SendSummary(List<Zaptec.PriceResult> priceResults)
@@ -103,12 +109,23 @@ namespace chargeReporting.Services
                          Guid.NewGuid().ToString(),
                         _smtp));
 
-            var smtpClient = new SmtpClient(_smtp)
+            var smtpClient = new SmtpClient
             {
-                Port = 25,
-                //Credentials = new NetworkCredential("email", "password"),
-                //EnableSsl = true,               
+                Host = _smtp,
+                Port = 25
             };
+            
+            if(_smtpPort != 0)
+            {
+                smtpClient.Port = _smtpPort;
+            };
+
+            if(_smtpUser != "")
+            {
+                smtpClient.Credentials = new NetworkCredential(_smtpUser, _smtpPwd);
+                smtpClient.EnableSsl = true;
+                smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            }
 
             smtpClient.Send(mail);
 

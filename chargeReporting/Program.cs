@@ -25,6 +25,15 @@ namespace chargeReporting
             [Option('s', "smtp", Required = false, HelpText = "smtp server")]
             public string Smtp { get; set; }
 
+            [Option('m', "smtpuser", Required = false, HelpText = "smtp username")]
+            public string SmtpUser { get; set; } = "";
+
+            [Option('w', "smtppwd", Required = false, HelpText = "smtp password")]
+            public string SmtpPassword { get; set; } = "";
+
+            [Option('l', "smtpport", Required = false, HelpText = "smtp tcl port")]
+            public int SmtpPort { get; set; } = 0;
+
             [Option('u', "user", Required = false, HelpText = "zaptec user")]
             public string ZaptecUser { get; set; }
 
@@ -68,7 +77,7 @@ namespace chargeReporting
                         return;
                     }
 
-                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.CurrentMonth, o.EmailText, o.GridRent, o.Volte, o.Subsidization).Wait();
+                    Zaptec.MakeReport(o.EmailMappings, o.ZaptecUser, o.ZaptecPassword, o.EmailFrom, o.Smtp, o.SmtpUser, o.SmtpPassword, o.SmtpPort, o.CurrentMonth, o.EmailText, o.GridRent, o.Volte, o.Subsidization).Wait();
 
                 });
             }
