@@ -165,8 +165,12 @@ namespace chargeReporting.Models
                         double subsidizationFactor = (double)subsidization / 100; //0.9;
                         if (hourPriceExTax > subsidizationLimit)
                         {                            
-                            if(hourPriceExTax > Volte.AvgPrice) hourPriceExTax = Volte.AvgPrice;//maximum subsidization is monthly avg for some reason
-                            subsidized = ((hourPriceExTax - subsidizationLimit)*subsidizationFactor) * hourKw;
+                            //if(hourPriceExTax > Volte.AvgPrice) hourPriceExTax = Volte.AvgPrice;//maximum subsidization is monthly avg for some reason
+                            //subsidized = ((hourPriceExTax - subsidizationLimit)*subsidizationFactor) * hourKw;
+                            //totalSubsidized += subsidized;
+
+                            //changed subsidization to be based on hourly price
+                            subsidized = ((hourPriceExTax-subsidizationLimit) * subsidizationFactor) * hourKw;
                             totalSubsidized += subsidized;
                         }
                     }

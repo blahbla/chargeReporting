@@ -14,7 +14,7 @@ namespace chargeReporting.Services
     public class Volte
     {
         static WebClient _client;
-        public static double AvgPrice { get; set; }
+        //public static double AvgPrice { get; set; }
 
         public Volte(string voltekey)
         {
@@ -47,7 +47,7 @@ namespace chargeReporting.Services
             }
 
             //get average from list object
-            AvgPrice = voltePrices.Average(x => x.spot);
+            //AvgPrice = voltePrices.Average(x => x.spot);
 
             return voltePrices;
         }
